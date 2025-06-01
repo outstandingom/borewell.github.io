@@ -6,7 +6,9 @@
     <title>ProCut | Premium Salon Services</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
+  
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="main.js" defer></script>  <style>
         :root {
             --primary: #000;
             --secondary: #8a6d3b;
@@ -464,50 +466,6 @@
             </a>
         </div>
     </nav>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Initialize Bootstrap components
-        const locationModal = new bootstrap.Modal(document.getElementById('locationModal'));
-        
-        // Location selection functionality
-        document.querySelectorAll('.location-option').forEach(option => {
-            option.addEventListener('click', function() {
-                const location = this.getAttribute('data-location');
-                document.querySelector('.location-text').textContent = location;
-                locationModal.hide();
-                
-                // Show confirmation
-                const event = new CustomEvent('locationChanged', { detail: location });
-                document.dispatchEvent(event);
-            });
-        });
-        
-        // Search functionality
-        document.getElementById('searchButton').addEventListener('click', function() {
-            const searchTerm = document.getElementById('searchInput').value;
-            if(searchTerm.trim() !== '') {
-                alert(`Searching for: ${searchTerm}`);
-                // In a real app, this would trigger a search API call
-            } else {
-                document.getElementById('searchInput').focus();
-            }
-        });
-        
-        // Press Enter to search
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') {
-                document.getElementById('searchButton').click();
-            }
-        });
-        
-        // Category selection
-        document.querySelectorAll('.category').forEach(category => {
-            category.addEventListener('click', function() {
-                document.querySelectorAll('.category').forEach(cat => cat.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-    </script>
+<script src="main.js" defer></script>
 </body>
 </html>
