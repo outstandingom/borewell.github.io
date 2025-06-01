@@ -315,5 +315,74 @@ document.getElementById('facebookSignIn').addEventListener('click', function() {
         });
 });
 
-// 
+// login page 
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCsJR-aYy0VGSPvb7pXHaK3EmGsJWcvdDo",
+  authDomain: "login-fa2eb.firebaseapp.com",
+  projectId: "login-fa2eb",
+  storageBucket: "login-fa2eb.appspot.com",
+  messagingSenderId: "1093052500996",
+  appId: "1:1093052500996:web:05a13485172c455e93b951",
+  measurementId: "G-9TC2J0YQ3R"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// Password visibility toggle
+const passwordToggle = document.getElementById('loginPasswordToggle');
+const passwordField = document.getElementById('loginPassword');
+
+passwordToggle.addEventListener('click', function () {
+  if (passwordField.type === 'password') {
+    passwordField.type = 'text';
+    passwordToggle.innerHTML = '<i class="fas fa-eye-slash"></i>';
+  } else {
+    passwordField.type = 'password';
+    passwordToggle.innerHTML = '<i class="fas fa-eye"></i>';
+  }
+});
+
+// Login form submission
+document.getElementById('loginForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  if (email && password) {
+    auth.signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        // Login successful
+        document.getElementById('successMessage').textContent = 'Login successful! Redirecting...';
+        document.getElementById('successMessage').style.display = 'block';
+
+        // Redirect after short delay
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+        document.getElementById('loginError').textContent = errorMessage;
+        document.getElementById('loginError').style.display = 'block';
+      });
+  } else {
+    document.getElementById('loginError').textContent = 'Please fill in all fields';
+    document.getElementById('loginError').style.display = 'block';
+  }
+});
+
+// Add subtle animation to form inputs on focus
+document.querySelectorAll('.form-control').forEach(input => {
+  input.addEventListener('focus', function () {
+    this.style.boxShadow = '0 0 0 3px rgba(18, 18, 18, 0.1)';
+  });
+
+  input.addEventListener('blur', function () {
+    this.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.03)';
+  });
+});
   
