@@ -109,7 +109,7 @@ function signInWithGoogle() {
             console.log('Google sign-in successful', user);
             
             // Redirect or update UI
-            window.location.href = 'https://outstandingom.github.io/pro.github.io/index.html'; // Change to your desired redirect
+            window.location.href = 'index.html'; // Change to your desired redirect
         })
         .catch((error) => {
             // Handle Errors here
@@ -148,7 +148,7 @@ function handleRegistration() {
         })
         .then(() => {
             // Redirect after successful registration
-            window.location.href = '/https://outstandingom.github.io/pro.github.io/index.html'; // Change to your desired redirect
+            window.location.href = 'pro.github.io/index.html'; // Change to your desired redirect
         })
         .catch((error) => {
             const errorCode = error.code;
@@ -170,7 +170,7 @@ function handleLogin() {
             console.log('User logged in:', user);
             
             // Redirect after successful login
-            window.location.href = '/dashboard.html'; // Change to your desired redirect
+            window.location.href = 'index.html'; // Change to your desired redirect
         })
         .catch((error) => {
             const errorCode = error.code;
