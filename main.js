@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // Firebase configuration
+
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCsJR-aYy0VGSPvb7pXHaK3EmGsJWcvdDo",
     authDomain: "login-fa2eb.firebaseapp.com",
@@ -100,10 +102,13 @@ confirmPasswordToggle.addEventListener('click', function() {
 });
 
 // Password strength indicator
+const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+const passwordStrengthText = document.getElementById('passwordStrengthText');
+
 registerPasswordField.addEventListener('input', function() {
     const password = this.value;
-    const strengthBar = document.getElementById('passwordStrength');
     let strength = 0;
+    let strengthText = '';
 
     // Check password criteria
     if (password.length >= 8) strength += 25;
@@ -112,16 +117,24 @@ registerPasswordField.addEventListener('input', function() {
     if (/[^A-Za-z0-9]/.test(password)) strength += 25;
 
     // Update strength bar
-    strengthBar.style.width = `${strength}%`;
+    passwordStrengthBar.style.width = `${strength}%`;
 
-    // Update color
+    // Update color and text
     if (strength < 50) {
-        strengthBar.style.backgroundColor = '#FF5722';
+        passwordStrengthBar.style.backgroundColor = '#FF5722';
+        strengthText = 'Weak';
+        passwordStrengthText.className = 'password-strength-text strength-weak';
     } else if (strength < 75) {
-        strengthBar.style.backgroundColor = '#FFC107';
+        passwordStrengthBar.style.backgroundColor = '#FFC107';
+        strengthText = 'Medium';
+        passwordStrengthText.className = 'password-strength-text strength-medium';
     } else {
-        strengthBar.style.backgroundColor = '#4CAF50';
+        passwordStrengthBar.style.backgroundColor = '#4CAF50';
+        strengthText = 'Strong';
+        passwordStrengthText.className = 'password-strength-text strength-strong';
     }
+    
+    passwordStrengthText.textContent = strengthText;
 });
 
 // Form validation
@@ -142,6 +155,10 @@ function validateForm() {
     // Validate name
     if (name === '') {
         document.getElementById('nameError').textContent = 'Full name is required';
+        document.getElementById('nameError').style.display = 'block';
+        isValid = false;
+    } else if (name.length < 3) {
+        document.getElementById('nameError').textContent = 'Name must be at least 3 characters';
         document.getElementById('nameError').style.display = 'block';
         isValid = false;
     }
@@ -231,6 +248,8 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
 
             // Reset form
             document.getElementById('registerForm').reset();
+            passwordStrengthBar.style.width = '0';
+            passwordStrengthText.textContent = '';
 
             // Redirect to index.html after 2 seconds
             setTimeout(() => {
@@ -260,60 +279,58 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
                     document.getElementById('passwordError').textContent = errorMessage;
                     document.getElementById('passwordError').style.display = 'block';
                     break;
+                case 'auth/operation-not-allowed':
+                    errorMessage = 'This operation is not allowed.';
+                    break;
                 default:
                     alert(errorMessage);
             }
         });
 });
 
-// Social login handlers
+// Social login functionality
 document.getElementById('googleSignIn').addEventListener('click', function() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-        .then((result) => {
-            // Handle successful login
-            const user = result.user;
-            return db.collection('users').doc(user.uid).set({
-                name: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                provider: 'google',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        })
-        .then(() => {
-            window.location.href = 'https://outstandingom.github.io/pro.github.io/index.html'; // Redirect to dashboard
-        })
-        .catch((error) => {
-            console.error('Google sign in error:', error);
-            alert('Google sign in failed: ' + error.message);
-        });
+    socialSignIn(provider);
 });
 
 document.getElementById('facebookSignIn').addEventListener('click', function() {
     const provider = new firebase.auth.FacebookAuthProvider();
+    socialSignIn(provider);
+});
+
+function socialSignIn(provider) {
     auth.signInWithPopup(provider)
         .then((result) => {
-            // Handle successful login
+            // User signed in
             const user = result.user;
-            return db.collection('users').doc(user.uid).set({
-                name: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                provider: 'facebook',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            
+            // Check if this is a new user
+            if (result.additionalUserInfo.isNewUser) {
+                // Save user data to Firestore
+                return db.collection('users').doc(user.uid).set({
+                    name: user.displayName || 'Social User',
+                    email: user.email || '',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                    provider: provider.providerId
+                });
+            } else {
+                // Update last login for existing user
+                return db.collection('users').doc(user.uid).update({
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
         })
         .then(() => {
-            window.location.href = 'https://outstandingom.github.io/pro.github.io/index.html'; // Redirect to dashboard
+            // Redirect after successful login
+            window.location.href = 'https://outstandingom.github.io/pro.github.io/index.html';
         })
         .catch((error) => {
-            console.error('Facebook sign in error:', error);
-            alert('Facebook sign in failed: ' + error.message);
+            console.error('Social sign-in error:', error);
+            alert('Social sign-in failed. Please try again.');
         });
-});
+}
 
 // login page 
 // Firebase configuration
