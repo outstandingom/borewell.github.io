@@ -234,7 +234,7 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
 
             // Redirect to index.html after 2 seconds
             setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = 'https://outstandingom.github.io/pro.github.io/index.html';
             }, 2000);
         })
         .catch((error) => {
@@ -283,7 +283,7 @@ document.getElementById('googleSignIn').addEventListener('click', function() {
             }, { merge: true });
         })
         .then(() => {
-            window.location.href = 'index.html'; // Redirect to dashboard
+            window.location.href = 'https://outstandingom.github.io/pro.github.io/index.html'; // Redirect to dashboard
         })
         .catch((error) => {
             console.error('Google sign in error:', error);
@@ -307,7 +307,7 @@ document.getElementById('facebookSignIn').addEventListener('click', function() {
             }, { merge: true });
         })
         .then(() => {
-            window.location.href = 'index.html'; // Redirect to dashboard
+            window.location.href = 'https://outstandingom.github.io/pro.github.io/index.html'; // Redirect to dashboard
         })
         .catch((error) => {
             console.error('Facebook sign in error:', error);
@@ -361,7 +361,7 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
 
         // Redirect after short delay
         setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = 'https://outstandingom.github.io/pro.github.io/index.html';
         }, 1500);
       })
       .catch((error) => {
