@@ -14,6 +14,9 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// Add Google Auth Provider
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
 document.addEventListener('DOMContentLoaded', function() {
     // Registration functionality
     if (document.getElementById('registerForm')) {
@@ -24,6 +27,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('loginForm')) {
         initLogin();
     }
+    
+    // Check auth state
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // User is signed in
+            console.log('User logged in:', user);
+            // You can redirect or update UI here
+        } else {
+            // User is signed out
+            console.log('User signed out');
+        }
+    });
 });
 
 function initRegistration() {
@@ -55,13 +70,9 @@ function initRegistration() {
         handleRegistration();
     });
 
-    // Social login
+    // Google Sign-In button
     document.getElementById('googleSignIn')?.addEventListener('click', function() {
-        socialSignIn(new firebase.auth.GoogleAuthProvider());
-    });
-
-    document.getElementById('facebookSignIn')?.addEventListener('click', function() {
-        socialSignIn(new firebase.auth.FacebookAuthProvider());
+        signInWithGoogle();
     });
 }
 
@@ -79,6 +90,94 @@ function initLogin() {
         e.preventDefault();
         handleLogin();
     });
+    
+    // Google Sign-In button for login page
+    document.getElementById('googleSignIn')?.addEventListener('click', function() {
+        signInWithGoogle();
+    });
+}
+
+// Sign in with Google function
+function signInWithGoogle() {
+    auth.signInWithPopup(googleProvider)
+        .then((result) => {
+            // This gives you a Google Access Token
+            const credential = result.credential;
+            const token = credential.accessToken;
+            // The signed-in user info
+            const user = result.user;
+            console.log('Google sign-in successful', user);
+            
+            // Redirect or update UI
+            window.location.href = 'https://outstandingom.github.io/pro.github.io/index.html'; // Change to your desired redirect
+        })
+        .catch((error) => {
+            // Handle Errors here
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error('Google sign-in error', errorCode, errorMessage);
+            
+            // Show error to user
+            alert(`Google sign-in failed: ${errorMessage}`);
+        });
+}
+
+// Email/password registration
+function handleRegistration() {
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    // Basic validation
+    if (password !== confirmPassword) {
+        alert("Passwords don't match!");
+        return;
+    }
+
+    auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            // Signed up successfully
+            const user = userCredential.user;
+            console.log('User registered:', user);
+            
+            // You can add user data to Firestore here if needed
+            return db.collection('users').doc(user.uid).set({
+                email: user.email,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        })
+        .then(() => {
+            // Redirect after successful registration
+            window.location.href = '/https://outstandingom.github.io/pro.github.io/index.html'; // Change to your desired redirect
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error('Registration error:', errorCode, errorMessage);
+            alert(`Registration failed: ${errorMessage}`);
+        });
+}
+
+// Email/password login
+function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            // Signed in successfully
+            const user = userCredential.user;
+            console.log('User logged in:', user);
+            
+            // Redirect after successful login
+            window.location.href = '/dashboard.html'; // Change to your desired redirect
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error('Login error:', errorCode, errorMessage);
+            alert(`Login failed: ${errorMessage}`);
+        });
 }
 
 // Helper functions
@@ -122,7 +221,4 @@ function updatePasswordStrength(password, strengthBar, strengthText) {
     }
     
     strengthText.textContent = strengthLabel;
-}
-
-// [Rest of your functions like handleRegistration, handleLogin, socialSignIn, etc.]
-// Continue with the rest of your existing JavaScript logic
+                }
