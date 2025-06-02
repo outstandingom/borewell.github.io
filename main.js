@@ -175,26 +175,58 @@ function handleRegistration() {
 
 
 // Email/password login
+
+// Email/password login with Firestore verification
 function handleLogin() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
+    // Show loading state
+    const loginBtn = document.getElementById('loginBtn');
+    loginBtn.disabled = true;
+
     auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            // Signed in successfully
             const user = userCredential.user;
-            console.log('User logged in:', user);
             
-            // Redirect after successful login
-            window.location.href = 'index.html'; // Change to your desired redirect
+            // 1. Verify Firestore data exists
+            return db.collection('users').doc(user.uid).get();
+        })
+        .then((doc) => {
+            if (!doc.exists) {
+                // 2. Auto-recover missing data
+                console.warn("Firestore data missing - recreating");
+                return db.collection('users').doc(auth.currentUser.uid).set({
+                    email: auth.currentUser.email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    initialized: true
+                });
+            }
+            return true; // Data exists, continue
+        })
+        .then(() => {
+            // 3. Only redirect after all checks
+            window.location.href = 'index.html';
         })
         .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.error('Login error:', errorCode, errorMessage);
+            loginBtn.disabled = false;
+            
+            // Special case: Firestore permission denied
+            if (error.code === 'permission-denied') {
+                alert("Login successful but profile inaccessible. Contact support.");
+                auth.signOut(); // Prevent partial access
+                return;
+            }
+            
+            // Standard auth errors
+            let errorMessage = error.message;
+            if (error.code === 'auth/user-not-found') {
+                errorMessage = "No account found. Please register.";
+            }
             alert(`Login failed: ${errorMessage}`);
         });
 }
+
 
 // Helper functions
 function togglePasswordVisibility(field, toggle) {
