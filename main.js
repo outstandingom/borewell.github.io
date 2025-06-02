@@ -1,6 +1,8 @@
-import{intializeApp} from 'firebase/app';
-import{getFirestore} from 'firebase/firestore';
-    // Firebase configuration (only once)
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCsJR-aYy0VGSPvb7pXHaK3EmGsJWcvdDo",
     authDomain: "login-fa2eb.firebaseapp.com",
@@ -12,12 +14,12 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Add Google Auth Provider
-const googleProvider = new firebase.auth.GoogleAuthProvider();
+const googleProvider = new GoogleAuthProvider();
 
 document.addEventListener('DOMContentLoaded', function() {
     // Registration functionality
@@ -31,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Check auth state
-    auth.onAuthStateChanged(user => {
+    onAuthStateChanged(auth, user => {
         if (user) {
             // User is signed in
             console.log('User logged in:', user);
@@ -43,10 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-
-// Add this function to your main.js
 function checkAuthState() {
-    auth.onAuthStateChanged(user => {
+    onAuthStateChanged(auth, user => {
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.querySelector('.search-button');
         
@@ -67,14 +67,13 @@ function checkAuthState() {
             if (searchButton) {
                 searchButton.disabled = true;
                 searchButton.onclick = function() {
-                    window.location.href = 'signin.html'; // Change to your login page
+                    window.location.href = 'signin.html';
                 };
             }
         }
     });
 }
 
-// Update your DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', function() {
     // Registration functionality
     if (document.getElementById('registerForm')) {
@@ -90,10 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     checkAuthState();
 });
 
-    //new code
-
 function initRegistration() {
-    // Password visibility toggle
     const registerPasswordToggle = document.getElementById('registerPasswordToggle');
     const registerPasswordField = document.getElementById('registerPassword');
     const confirmPasswordToggle = document.getElementById('confirmPasswordToggle');
@@ -107,7 +103,6 @@ function initRegistration() {
         togglePasswordVisibility(confirmPasswordField, confirmPasswordToggle);
     });
 
-    // Password strength indicator
     const passwordStrengthBar = document.getElementById('passwordStrengthBar');
     const passwordStrengthText = document.getElementById('passwordStrengthText');
 
@@ -115,20 +110,17 @@ function initRegistration() {
         updatePasswordStrength(this.value, passwordStrengthBar, passwordStrengthText);
     });
 
-    // Form submission
     document.getElementById('registerForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
         handleRegistration();
     });
 
-    // Google Sign-In button
     document.getElementById('googleSignIn')?.addEventListener('click', function() {
         signInWithGoogle();
     });
 }
 
 function initLogin() {
-    // Password visibility toggle
     const passwordToggle = document.getElementById('loginPasswordToggle');
     const passwordField = document.getElementById('loginPassword');
 
@@ -136,107 +128,81 @@ function initLogin() {
         togglePasswordVisibility(passwordField, passwordToggle);
     });
 
-    // Form submission
     document.getElementById('loginForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
         handleLogin();
     });
     
-    // Google Sign-In button for login page
     document.getElementById('googleSignIn')?.addEventListener('click', function() {
         signInWithGoogle();
     });
 }
 
-// Sign in with Google function
-function signInWithGoogle() {
-    auth.signInWithPopup(googleProvider)
-        .then((result) => {
-            // This gives you a Google Access Token
-            const credential = result.credential;
-            const token = credential.accessToken;
-            // The signed-in user info
-            const user = result.user;
-            console.log('Google sign-in successful', user);
-            
-            // Redirect or update UI
-            window.location.href = 'index.html'; // Change to your desired redirect
-        })
-        .catch((error) => {
-            // Handle Errors here
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.error('Google sign-in error', errorCode, errorMessage);
-            
-            // Show error to user
-            alert(`Google sign-in failed: ${errorMessage}`);
-        });
+async function signInWithGoogle() {
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        // This gives you a Google Access Token
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        // The signed-in user info
+        const user = result.user;
+        console.log('Google sign-in successful', user);
+        
+        // Redirect or update UI
+        window.location.href = 'index.html';
+    } catch (error) {
+        // Handle Errors here
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error('Google sign-in error', errorCode, errorMessage);
+        
+        // Show error to user
+        alert(`Google sign-in failed: ${errorMessage}`);
+    }
 }
 
-// Email/password registration
-
-
-function handleRegistration() {
+async function handleRegistration() {
     const email = document.getElementById('registerEmail').value;
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
-    // Basic validation
     if (password !== confirmPassword) {
         alert("Passwords don't match!");
         return;
     }
 
-    auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            // Signed up successfully
-            const user = userCredential.user;
-            console.log('User registered:', user);
-            
-            // You can add user data to Firestore here if needed
-            return db.collection('users').doc(user.uid).set({
-                email: user.email,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        })
-        .then(() => {
-            // Redirect after successful registration
-            window.location.href = 'index.html'; // Change to your desired redirect
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.error('Registration error:', errorCode, errorMessage);
-            alert(`Registration failed: ${errorMessage}`);
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        console.log('User registered:', user);
+        
+        await setDoc(doc(db, 'users', user.uid), {
+            email: user.email,
+            createdAt: serverTimestamp()
         });
+        
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Registration error:', error.code, error.message);
+        alert(`Registration failed: ${error.message}`);
+    }
 }
 
-
-// Email/password login
-
-function handleLogin() {
+async function handleLogin() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
-    auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            // Signed in successfully
-            const user = userCredential.user;
-            console.log('User logged in:', user);
-            
-            // Redirect after successful login
-            window.location.href = 'index.html'; // Change to your desired redirect
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.error('Login error:', errorCode, errorMessage);
-            alert(`Login failed: ${errorMessage}`);
-        });
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        console.log('User logged in:', user);
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Login error:', error.code, error.message);
+        alert(`Login failed: ${error.message}`);
+    }
 }
 
-
-// Helper functions
 function togglePasswordVisibility(field, toggle) {
     if (!field || !toggle) return;
     
@@ -277,4 +243,4 @@ function updatePasswordStrength(password, strengthBar, strengthText) {
     }
     
     strengthText.textContent = strengthLabel;
-                }
+}
