@@ -1,4 +1,6 @@
-// Firebase configuration (only once)
+import{intializeApp} from 'firebase/app';
+import{getFirestore} from 'firebase/firestore';
+    // Firebase configuration (only once)
 const firebaseConfig = {
     apiKey: "AIzaSyCsJR-aYy0VGSPvb7pXHaK3EmGsJWcvdDo",
     authDomain: "login-fa2eb.firebaseapp.com",
