@@ -123,40 +123,56 @@ function signInWithGoogle() {
 }
 
 // Email/password registration
+
 function handleRegistration() {
     const email = document.getElementById('registerEmail').value;
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
-    // Basic validation
     if (password !== confirmPassword) {
         alert("Passwords don't match!");
         return;
     }
 
+    // Show loading state (disable button/spinner)
+    const registerBtn = document.getElementById('registerBtn');
+    registerBtn.disabled = true;
+
     auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            // Signed up successfully
             const user = userCredential.user;
-            console.log('User registered:', user);
             
-            // You can add user data to Firestore here if needed
+            // 1. First write critical user data
             return db.collection('users').doc(user.uid).set({
                 email: user.email,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                initialized: false // Flag for completion
             });
         })
         .then(() => {
-            // Redirect after successful registration
-            window.location.href = 'pro.github.io/index.html'; // Change to your desired redirect
+            // 2. Only redirect AFTER Firestore confirms write
+            window.location.href = 'index.html';
         })
         .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.error('Registration error:', errorCode, errorMessage);
-            alert(`Registration failed: ${errorMessage}`);
+            registerBtn.disabled = false; // Re-enable button
+            
+            // Handle specific errors
+            if (error.code === 'auth/email-already-in-use') {
+                alert('Email already registered. Please log in.');
+            } 
+            else if (error.code === 'permission-denied') {
+                // Critical: Auth succeeded but Firestore failed
+                console.error("Firestore permission denied - check security rules");
+                alert("Account created but setup incomplete. Contact support.");
+                auth.signOut(); // Prevent partial state
+            }
+            else {
+                alert(`Registration failed: ${error.message}`);
+            }
         });
 }
+
+
 
 // Email/password login
 function handleLogin() {
