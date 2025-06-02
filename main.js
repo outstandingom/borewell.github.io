@@ -124,105 +124,62 @@ function signInWithGoogle() {
 
 // Email/password registration
 
+
 function handleRegistration() {
     const email = document.getElementById('registerEmail').value;
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
+    // Basic validation
     if (password !== confirmPassword) {
         alert("Passwords don't match!");
         return;
     }
 
-    // Show loading state (disable button/spinner)
-    const registerBtn = document.getElementById('registerBtn');
-    registerBtn.disabled = true;
-
     auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
+            // Signed up successfully
             const user = userCredential.user;
+            console.log('User registered:', user);
             
-            // 1. First write critical user data
+            // You can add user data to Firestore here if needed
             return db.collection('users').doc(user.uid).set({
                 email: user.email,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                initialized: false // Flag for completion
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         })
         .then(() => {
-            // 2. Only redirect AFTER Firestore confirms write
-            window.location.href = 'index.html';
+            // Redirect after successful registration
+            window.location.href = 'pro.github.io/index.html'; // Change to your desired redirect
         })
         .catch((error) => {
-            registerBtn.disabled = false; // Re-enable button
-            
-            // Handle specific errors
-            if (error.code === 'auth/email-already-in-use') {
-                alert('Email already registered. Please log in.');
-            } 
-            else if (error.code === 'permission-denied') {
-                // Critical: Auth succeeded but Firestore failed
-                console.error("Firestore permission denied - check security rules");
-                alert("Account created but setup incomplete. Contact support.");
-                auth.signOut(); // Prevent partial state
-            }
-            else {
-                alert(`Registration failed: ${error.message}`);
-            }
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error('Registration error:', errorCode, errorMessage);
+            alert(`Registration failed: ${errorMessage}`);
         });
 }
 
 
-
 // Email/password login
 
-// Email/password login with Firestore verification
 function handleLogin() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
-    // Show loading state
-    const loginBtn = document.getElementById('loginBtn');
-    loginBtn.disabled = true;
-
     auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
+            // Signed in successfully
             const user = userCredential.user;
+            console.log('User logged in:', user);
             
-            // 1. Verify Firestore data exists
-            return db.collection('users').doc(user.uid).get();
-        })
-        .then((doc) => {
-            if (!doc.exists) {
-                // 2. Auto-recover missing data
-                console.warn("Firestore data missing - recreating");
-                return db.collection('users').doc(auth.currentUser.uid).set({
-                    email: auth.currentUser.email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    initialized: true
-                });
-            }
-            return true; // Data exists, continue
-        })
-        .then(() => {
-            // 3. Only redirect after all checks
-            window.location.href = 'index.html';
+            // Redirect after successful login
+            window.location.href = 'index.html'; // Change to your desired redirect
         })
         .catch((error) => {
-            loginBtn.disabled = false;
-            
-            // Special case: Firestore permission denied
-            if (error.code === 'permission-denied') {
-                alert("Login successful but profile inaccessible. Contact support.");
-                auth.signOut(); // Prevent partial access
-                return;
-            }
-            
-            // Standard auth errors
-            let errorMessage = error.message;
-            if (error.code === 'auth/user-not-found') {
-                errorMessage = "No account found. Please register.";
-            }
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error('Login error:', errorCode, errorMessage);
             alert(`Login failed: ${errorMessage}`);
         });
 }
