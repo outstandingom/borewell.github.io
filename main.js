@@ -347,13 +347,15 @@ passwordToggle.addEventListener('click', function () {
 
 // Login form submission
 // Firebase configuration
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+const firebaseConfig ={
+  apiKey: "AIzaSyCsJR-aYy0VGSPvb7pXHaK3EmGsJWcvdDo",
+  authDomain: "login-fa2eb.firebaseapp.com",
+  projectId: "login-fa2eb",
+  storageBucket: "login-fa2eb.appspot.com", // ✅ Fixed this line
+  messagingSenderId: "1093052500996",
+  appId: "1:1093052500996:web:05a13485172c455e93b951",
+  measurementId: "G-9TC2J0YQ3R"
+};
 };
 
 // Initialize Firebase
