@@ -67,7 +67,7 @@ function checkAuthState() {
             if (searchButton) {
                 searchButton.disabled = true;
                 searchButton.onclick = function() {
-                    window.location.href = 'login.html'; // Change to your login page
+                    window.location.href = 'signin.html'; // Change to your login page
                 };
             }
         }
@@ -201,7 +201,7 @@ function handleRegistration() {
         })
         .then(() => {
             // Redirect after successful registration
-            window.location.href = 'pro.github.io/index.html'; // Change to your desired redirect
+            window.location.href = 'index.html'; // Change to your desired redirect
         })
         .catch((error) => {
             const errorCode = error.code;
