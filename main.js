@@ -346,36 +346,56 @@ passwordToggle.addEventListener('click', function () {
 });
 
 // Login form submission
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// Handle login form submit
 document.getElementById('loginForm').addEventListener('submit', function (e) {
   e.preventDefault();
 
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
 
+  const successMessage = document.getElementById('successMessage');
+  const errorMessage = document.getElementById('loginError');
+
+  // Clear previous messages
+  successMessage.style.display = 'none';
+  errorMessage.style.display = 'none';
+
   if (email && password) {
     auth.signInWithEmailAndPassword(email, password)
       .then((userCredential) => {
         // Login successful
-        document.getElementById('successMessage').textContent = 'Login successful! Redirecting...';
-        document.getElementById('successMessage').style.display = 'block';
+        successMessage.textContent = 'Login successful! Redirecting...';
+        successMessage.style.display = 'block';
 
-        // Redirect after short delay
         setTimeout(() => {
           window.location.href = 'https://outstandingom.github.io/pro.github.io/index.html';
         }, 1500);
       })
       .catch((error) => {
-        const errorMessage = error.message;
-        document.getElementById('loginError').textContent = errorMessage;
-        document.getElementById('loginError').style.display = 'block';
+        errorMessage.textContent = error.message;
+        errorMessage.style.display = 'block';
       });
   } else {
-    document.getElementById('loginError').textContent = 'Please fill in all fields';
-    document.getElementById('loginError').style.display = 'block';
+    errorMessage.textContent = 'Please fill in all fields';
+    errorMessage.style.display = 'block';
   }
 });
 
-// Add subtle animation to form inputs on focus
+// Animate inputs on focus/blur
 document.querySelectorAll('.form-control').forEach(input => {
   input.addEventListener('focus', function () {
     this.style.boxShadow = '0 0 0 3px rgba(18, 18, 18, 0.1)';
@@ -385,4 +405,3 @@ document.querySelectorAll('.form-control').forEach(input => {
     this.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.03)';
   });
 });
-  
