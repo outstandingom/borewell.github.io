@@ -41,6 +41,55 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+
+// Add this function to your main.js
+function checkAuthState() {
+    auth.onAuthStateChanged(user => {
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.querySelector('.search-button');
+        
+        if (user) {
+            // User is signed in
+            console.log('User logged in:', user);
+            // Enable search functionality
+            if (searchInput) searchInput.disabled = false;
+            if (searchButton) searchButton.disabled = false;
+        } else {
+            // User is signed out
+            console.log('User signed out');
+            // Disable search functionality and show login prompt
+            if (searchInput) {
+                searchInput.disabled = true;
+                searchInput.placeholder = "Please login to search for salons";
+            }
+            if (searchButton) {
+                searchButton.disabled = true;
+                searchButton.onclick = function() {
+                    window.location.href = 'login.html'; // Change to your login page
+                };
+            }
+        }
+    });
+}
+
+// Update your DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function() {
+    // Registration functionality
+    if (document.getElementById('registerForm')) {
+        initRegistration();
+    }
+    
+    // Login functionality
+    if (document.getElementById('loginForm')) {
+        initLogin();
+    }
+    
+    // Check auth state for all pages
+    checkAuthState();
+});
+
+    //new code
+
 function initRegistration() {
     // Password visibility toggle
     const registerPasswordToggle = document.getElementById('registerPasswordToggle');
