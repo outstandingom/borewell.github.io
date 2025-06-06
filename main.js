@@ -112,7 +112,7 @@ function initLocationSelector() {
 }
 
 // Check Authentication State
-function checkAuthState() {
+function checkAuthStatee() {
     auth.onAuthStateChanged(user => {
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.querySelector('.search-button');
