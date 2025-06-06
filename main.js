@@ -11,7 +11,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);1
+
+
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
@@ -113,7 +116,7 @@ function initLocationSelector() {
 }
 
 // Check Authentication State
-unction checkAuthState() {
+function checkAuthState() {
     auth.onAuthStateChanged(user => {
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.querySelector('.search-button');
@@ -148,15 +151,15 @@ unction checkAuthState() {
             }
             
             // If on protected pages, redirect to login
-            if (window.location.pathname.includes('userprofile.html') || 
+           if (window.location.pathname.includes('userprofile.html') || 
                 window.location.pathname.includes('userbookings.html')) {
                 window.location.href = 'signin.html';
             }
-        }
+        
     });
 }
 
-// Handle Registration
+// Handle Registrat
 async function handleRegistration() {
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
