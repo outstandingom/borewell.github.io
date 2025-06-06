@@ -1,6 +1,7 @@
 // Firebase configuration and initialization
 const firebaseConfig = {
     apiKey: "AIzaSyCsJR-aYy0VGSPvb7pXHaK3EmGsJWcvdDo",
+    
     authDomain: "login-fa2eb.firebaseapp.com",
     projectId: "login-fa2eb",
     storageBucket: "login-fa2eb.appspot.com",
@@ -112,7 +113,7 @@ function initLocationSelector() {
 }
 
 // Check Authentication State
-function checkAuthStatee() {
+unction checkAuthState() {
     auth.onAuthStateChanged(user => {
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.querySelector('.search-button');
@@ -179,7 +180,7 @@ async function handleRegistration() {
         showError('passwordError', 'Please create a password');
         return;
     }
-    if (password.length < 6) {
+    if (password.length < 8 {
         showError('passwordError', 'Password must be at least 6 characters');
         return;
     }
